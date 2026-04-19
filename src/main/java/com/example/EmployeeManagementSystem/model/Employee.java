@@ -30,6 +30,9 @@ public class Employee {
     @Column(nullable = false)
     private EmployeeStatus status;
 
+    @Column(nullable = false)
+    private String pin;
+
     @ManyToOne
     @JoinColumn(name = "location_id")
     private Location location;

@@ -29,6 +29,5 @@ public class EmployeeRequest {
 
     @NotNull(message = "Department is required")
     private Long departmentId;
-
     private Long locationId;
 }
