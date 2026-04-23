@@ -6,6 +6,7 @@ import com.example.EmployeeManagementSystem.dto.EmployeeResponse;
 import com.example.EmployeeManagementSystem.exception.BusinessException;
 import com.example.EmployeeManagementSystem.exception.ResourceNotFoundException;
 import com.example.EmployeeManagementSystem.model.Department;
+import com.example.EmployeeManagementSystem.model.Employee;
 import com.example.EmployeeManagementSystem.model.Location;
 import com.example.EmployeeManagementSystem.repository.DepartmentRepository;
 import com.example.EmployeeManagementSystem.repository.EmployeeRepository;
@@ -115,6 +116,104 @@ public class EmployeeServiceTest {
 
         EmployeeResponse response = employeeService.createEmployee(request);
 
+
+        assertThat(response).isNotNull();
+        assertThat(response.getEmail()).isEqualTo("ahmad@test.com");
+        assertThat(response.getDepartmentName()).isEqualTo("IT");
+        assertThat(response.getLocationName()).isEqualTo("Essen");
+    }
+    @Test
+    void updateEmployee_whenEmployeeExists_ThrowsResourceNotFoundException() {
+        when(employeeRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> employeeService.updateEmployee(99L, new EmployeeRequest()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Employee with id 99 not found");
+    }
+    @Test
+    void updateEmployee_whenEmileExists_ThrowsBusinessException() {
+        EmployeeRequest request = new EmployeeRequest();
+        request.setEmail("ahmad@test.com");
+        Employee employee = new Employee();
+        employee.setId(99L);
+        employee.setEmail("old@test.com");
+        when(employeeRepository.findById(99L)).thenReturn(Optional.of(employee));
+        when(employeeRepository.existsByEmail("ahmad@test.com")).thenReturn(true);
+        assertThatThrownBy(() -> employeeService.updateEmployee(99L, request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Email already exists");
+    }
+    @Test
+    void updateEmployee_whenLocationExists_ThrowsResourceNotFoundException() {
+        EmployeeRequest request = new EmployeeRequest();
+        request.setEmail("ahmad@test.com");
+        request.setDepartmentId(99L);
+        request.setLocationId(33L);
+
+        Employee employee = new Employee();
+        employee.setId(99L);
+        employee.setEmail("old@test.com");
+
+        Department department = new Department();
+        department.setId(99L);
+
+        when(employeeRepository.findById(99L)).thenReturn(Optional.of(employee));
+        when(employeeRepository.existsByEmail("ahmad@test.com")).thenReturn(false);
+        when(departmentRepository.findById(99L)).thenReturn(Optional.of(department));
+        when(locationRepository.findById(33L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> employeeService.updateEmployee(99L, request))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Location with id 33 not found");
+    }
+    @Test
+    void updateEmployee_whenDepartmentExists_ThrowsResourceNotFoundException() {
+        EmployeeRequest request = new EmployeeRequest();
+        request.setEmail("ahmad@test.com");
+        request.setDepartmentId(99L);
+        request.setLocationId(33L);
+
+        Employee employee = new Employee();
+        employee.setId(99L);
+        employee.setEmail("old@test.com");
+
+        Location location = new Location();
+        location.setId(33L);
+        location.setName("Essen");
+        location.setAddress("Eckenbergstr");
+
+        when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
+        when(employeeRepository.findById(99L)).thenReturn(Optional.of(employee));
+        when(employeeRepository.existsByEmail("ahmad@test.com")).thenReturn(false);
+        when(locationRepository.findById(33L)).thenReturn(Optional.of(location));
+        assertThatThrownBy(() -> employeeService.updateEmployee(99L, request))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Department with id 99 not found");
+    }
+    @Test
+    void updateEmployee_WhenAllDataValid_ReturnsEmployeeResponse() {
+        EmployeeRequest request = new EmployeeRequest();
+        request.setEmail("ahmad@test.com");
+        request.setPassword("password");
+        Employee employee = new Employee();
+        employee.setId(99L);
+        employee.setEmail("old@test.com");
+        Department department = new Department();
+        department.setId(99L);
+        department.setName("IT");
+        request.setDepartmentId(99L);
+        Location location = new Location();
+        location.setId(33L);
+        location.setName("Essen");
+        location.setAddress("Eckenbergstr");
+        request.setLocationId(33L);
+        when(employeeRepository.findById(99L)).thenReturn(Optional.of(employee));
+        when(locationRepository.findById(33L)).thenReturn(Optional.of(location));
+        when(departmentRepository.findById(99L)).thenReturn(Optional.of(department));
+        when(employeeRepository.existsByEmail("ahmad@test.com"))
+                .thenReturn(false);
+        when(passwordEncoder.encode(any())).thenReturn("encoded");
+
+        EmployeeResponse response = employeeService.updateEmployee(99L, request);
 
         assertThat(response).isNotNull();
         assertThat(response.getEmail()).isEqualTo("ahmad@test.com");

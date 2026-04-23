@@ -6,10 +6,9 @@ import com.example.EmployeeManagementSystem.dto.EmployeeRequest;
 import com.example.EmployeeManagementSystem.dto.EmployeeResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/employee")
@@ -20,6 +19,26 @@ public class EmployeeController {
     @PostMapping
     public EmployeeResponse createEmployee(@RequestBody @Valid EmployeeRequest request){
      return employeeService.createEmployee(request);
+    }
+    @GetMapping
+    public List<EmployeeResponse> getAllEmployees() {
+        return employeeService.getAllEmployees();
+    }
+
+    @GetMapping("/{id}")
+    public EmployeeResponse getEmployee(@PathVariable Long id) {
+        return employeeService.getEmployee(id);
+    }
+
+    @PutMapping("/{id}")
+    public EmployeeResponse updateEmployee(@PathVariable Long id,
+                                           @RequestBody @Valid EmployeeRequest request) {
+        return employeeService.updateEmployee(id, request);
+    }
+
+    @PatchMapping("/{id}/status")
+    public EmployeeResponse inActiveEmployee(@PathVariable Long id) {
+        return employeeService.inActiveEmployee(id);
     }
 
 }
