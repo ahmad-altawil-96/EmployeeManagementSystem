@@ -1,5 +1,6 @@
 package com.example.EmployeeManagementSystem.Service;
 
+import com.example.EmployeeManagementSystem.dto.CreateEmployeeResponse;
 import com.example.EmployeeManagementSystem.dto.EmployeeRequest;
 import com.example.EmployeeManagementSystem.dto.EmployeeResponse;
 import com.example.EmployeeManagementSystem.exception.BusinessException;
@@ -15,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 
@@ -26,7 +30,7 @@ public class EmployeeService {
     private final LocationRepository locationRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public EmployeeResponse createEmployee(EmployeeRequest request) {
+    public CreateEmployeeResponse createEmployee(EmployeeRequest request) {
         String email = request.getEmail().toLowerCase();
         if (employeeRepository.existsByEmail(email)) {
             throw new BusinessException("Email already exists");
@@ -48,7 +52,7 @@ public class EmployeeService {
         employee.setLastName(request.getLastName());
         employee.setEmail(request.getEmail().toLowerCase());
         employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        employee.setPin(passwordEncoder.encode(rawPin));
+        employee.setPin(hashpin(rawPin));
         employee.setPosition(request.getPosition());
         employee.setRole(request.getRole());
         employee.setStatus(EmployeeStatus.ACTIVE);
@@ -56,11 +60,11 @@ public class EmployeeService {
         employee.setLocation(location);
 
         employeeRepository.save(employee);
-        return new EmployeeResponse(employee);
+        return new CreateEmployeeResponse(employee,rawPin);
     }
 
     private String generatePin() {
-        int pin = (int)(Math.random() * 9000) + 1000;
+        int pin = (int)(Math.random() * 900000) + 100000;
         return String.valueOf(pin);
     }
     public List<EmployeeResponse> getAllEmployees(){
@@ -114,7 +118,19 @@ public class EmployeeService {
         employeeRepository.save(employee);
         return new EmployeeResponse(employee);
     }
-
+    public String hashpin(String pin){
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(pin.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        }catch (NoSuchAlgorithmException e ){
+            throw new RuntimeException("SHA-256 not available", e);
+        }
+    }
 
 
 }

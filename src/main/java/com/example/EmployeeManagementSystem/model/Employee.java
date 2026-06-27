@@ -30,7 +30,7 @@ public class Employee {
     @Column(nullable = false)
     private EmployeeStatus status;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String pin;
 
     @ManyToOne

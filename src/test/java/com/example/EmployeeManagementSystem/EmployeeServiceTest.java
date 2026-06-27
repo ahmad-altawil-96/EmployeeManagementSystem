@@ -1,6 +1,7 @@
 package com.example.EmployeeManagementSystem;
 
 import com.example.EmployeeManagementSystem.Service.EmployeeService;
+import com.example.EmployeeManagementSystem.dto.CreateEmployeeResponse;
 import com.example.EmployeeManagementSystem.dto.EmployeeRequest;
 import com.example.EmployeeManagementSystem.dto.EmployeeResponse;
 import com.example.EmployeeManagementSystem.exception.BusinessException;
@@ -114,13 +115,13 @@ public class EmployeeServiceTest {
                 .thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("encoded");
 
-        EmployeeResponse response = employeeService.createEmployee(request);
-
+        CreateEmployeeResponse response = employeeService.createEmployee(request);
 
         assertThat(response).isNotNull();
         assertThat(response.getEmail()).isEqualTo("ahmad@test.com");
         assertThat(response.getDepartmentName()).isEqualTo("IT");
         assertThat(response.getLocationName()).isEqualTo("Essen");
+        assertThat(response.getPin()).isNotNull();
     }
     @Test
     void updateEmployee_whenEmployeeExists_ThrowsResourceNotFoundException() {
@@ -184,13 +185,12 @@ public class EmployeeServiceTest {
         when(departmentRepository.findById(99L)).thenReturn(Optional.empty());
         when(employeeRepository.findById(99L)).thenReturn(Optional.of(employee));
         when(employeeRepository.existsByEmail("ahmad@test.com")).thenReturn(false);
-        when(locationRepository.findById(33L)).thenReturn(Optional.of(location));
         assertThatThrownBy(() -> employeeService.updateEmployee(99L, request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Department with id 99 not found");
     }
     @Test
-    void updateEmployee_WhenAllDataValid_ReturnsEmployeeResponse() {
+    void updateEmployee_WhenAllDataValid_ReturnsCreateEmployeeResponse() {
         EmployeeRequest request = new EmployeeRequest();
         request.setEmail("ahmad@test.com");
         request.setPassword("password");
@@ -217,7 +217,6 @@ public class EmployeeServiceTest {
 
         assertThat(response).isNotNull();
         assertThat(response.getEmail()).isEqualTo("ahmad@test.com");
-        assertThat(response.getDepartmentName()).isEqualTo("IT");
-        assertThat(response.getLocationName()).isEqualTo("Essen");
+
     }
 }

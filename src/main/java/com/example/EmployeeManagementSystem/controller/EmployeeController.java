@@ -2,6 +2,7 @@ package com.example.EmployeeManagementSystem.controller;
 
 
 import com.example.EmployeeManagementSystem.Service.EmployeeService;
+import com.example.EmployeeManagementSystem.dto.CreateEmployeeResponse;
 import com.example.EmployeeManagementSystem.dto.EmployeeRequest;
 import com.example.EmployeeManagementSystem.dto.EmployeeResponse;
 import jakarta.validation.Valid;
@@ -17,7 +18,7 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @PostMapping
-    public EmployeeResponse createEmployee(@RequestBody @Valid EmployeeRequest request){
+    public CreateEmployeeResponse createEmployee(@RequestBody @Valid EmployeeRequest request){
      return employeeService.createEmployee(request);
     }
     @GetMapping
